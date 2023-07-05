@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth project</title>
+</head>
+
+<body>
+    <style>
+        /*Make this the same as login.html*/
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+        }
+        
+        .content {
+            width: 400px;
+            margin: auto auto auto auto;
+            margin-top: 100px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .content h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .link {
+            width: 94%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin: 3px;
+            background-color: #4CAF50;
+            color: #fff;
+            display: block;
+            text-align: center;
+            text-decoration: none;
+        }
+        .link:hover {
+            text-decoration: underline;
+        }
+        .u {
+            text-decoration: underline;
+        }
+    </style>
+    <div class="content">
+        <h1 class="header">Login or Register</h1>
+        <div>
+            <a href="/login" class="link">
+                <span class="u">L</span>ogin
+            </a>
+            <a href="/register" class="link">
+                <span class="u">R</span>egister
+            </a>
+        </div>
+    </div>
+    <script>
+        const login = document.querySelector('#login');
+        const username = document.querySelector('#username');
+        const password = document.querySelector('#password');
+        login.addEventListener('click', () => {
+            const data = {
+                username: username.value,
+                password: password.value
+            };
+            const url = 'http://localhost/login';
+            fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                }).then(res => res.json())
+                .then(data => {
+                    console.log(data);
+                    console.log(data.refreshToken)
+                    console.log(data.accessToken)
+                    localStorage.setItem('token', data.refreshToken);
+                });
+        });
+    </script>
+</body>
+
+</html>
