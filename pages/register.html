@@ -52,24 +52,46 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             margin: 3px;
-            background-color: #4CAF50;
+            background-color: #00684A;
             color: #fff;
             font-size: 16px;
+        }
+
+        .form select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin: 3px;
         }
     </style>
     <div class="content">
         <h1 class="header">Register</h1>
         <div class="form">
-            <input type="text" placeholder="Username..." id="username">
-            <input type="password" placeholder="Password..." id="password">
+            <input type="email" placeholder="Email" id="email">
+            <input type="text" placeholder="Username" id="username">
+            <input type="tel" placeholder="Phone number" id="phone_number">
+            <input type="password" placeholder="Password" id="password1">
+            <input type="password" placeholder="Confirm password" id="password2">
+            <select name="User type" id="user_type">
+                <option value="0">Volunteer</option>
+                <option value="1">Organization</option>
+            </select>
             <button id="login" onClick="login()">Register</button>
         </div>
     </div>
     <script>
         function login() {
-            let username = document.getElementById("username").value;
-            let password = document.getElementById("password").value;
-            if (username !== null && password !== null) {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password1").value;
+            const password2 = document.getElementById("password1").value;
+            const email = document.getElementById("email").value;
+            const phone_number = document.getElementById("phone_number").value;
+            const user_type = document.getElementById("user_type").value;
+
+            if (password !== password2)
+                alert("Passwords do not match");
+            else if (username !== null && password !== null) {
                 fetch('/auth/register', {
                     method: 'POST',
                     headers: {
@@ -77,7 +99,10 @@
                     },
                     body: JSON.stringify({
                         username: username,
-                        password: password
+                        password: password,
+                        email: email,
+                        phone_number: phone_number,
+                        user_type: user_type
                     })
                 }).then(
                     function(response) {
@@ -90,6 +115,9 @@
                         }
                     }
                 )
+            }
+            else {
+                alert("Please fill in all fields");
             }
         }
     </script>

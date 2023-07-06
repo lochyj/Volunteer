@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken')
 const mongo = require('mongodb').MongoClient
 const bcrypt = require('bcrypt')
 var cookieParser = require('cookie-parser')
-const url = 'mongodb://127.0.0.1:27017/'
+const url = 'mongodb://127.0.0.1:27017'
 const dbName = 'Volunteer'
 app.use(express.json())
 app.use(cookieParser())
@@ -54,9 +54,8 @@ app.get('/app', authenticateToken, (req, res) => { /* Add authenticateToken to m
 //     }
 // })
 
+// TODO: remove this in place of DB based authentication
 let refreshTokens = [];
-let users = [];
-updateUsers();
 
 app.post('/auth/register', async(req, res) => {
 
@@ -113,18 +112,29 @@ app.delete('/auth/logout', (req, res) => {
 })
 
 app.post('/auth/login', async(req, res) => {
-    const username = req.body.username
-    const user = users.find(user => user.username === username)
-    if (user) {
-        const password = req.body.password
-        const hash = user.password
-        const isValid = await bcrypt.compare(password, hash)
-        if (isValid) {
-            const accessToken = generateAccessToken({ name: user.username })
-            const refreshToken = jwt.sign({ name: user.username }, process.env.REFRESH_TOKEN_SECRET)
+    const {username, password} = req.body;
+
+    if (!username || !password)
+        return res.status(401).json({ error: 'Please provide a username and / or password' });
+
+    const doesUsernameExist = userExists(username);
+
+    if (doesUsernameExist) {
+
+        const userCredentials = getUserFromDB(username)
+        const storedHashedPassword = userCredentials.password
+
+        const passwordIsValid = await bcrypt.compare(password, storedHashedPassword)
+
+        if (passwordIsValid) {
+            const accessToken = generateAccessToken({ name: username })
+            const refreshToken = jwt.sign({ name: username }, process.env.REFRESH_TOKEN_SECRET)
+
             refreshTokens.push(refreshToken)
+
             res.cookie('accessToken', accessToken, { httpOnly: true })
             res.cookie('refreshToken', refreshToken, { httpOnly: true })
+
             res.send().status(200)
         } else {
             res.status(400).json({ error: 'Invalid credentials' })
@@ -136,7 +146,24 @@ app.post('/auth/login', async(req, res) => {
 
 // FUNCTION DEFINITIONS:
 
-function mongoError(error, message = "") {
+async function openDBConnection() {
+    var collection = null;
+    mongo.connect(url, (err, client) => {
+        if (err) {
+            mongoError(err, "openDBConnection - connect");
+        }
+        var db = client.db(dbName);
+        collection = db.collection("Users");
+    }).then(() => {
+        if (collection == null) {
+            mongoError("collection is null", "openDBConnection - collection");
+        }
+
+        return collection;
+    });
+}
+
+function mongoError(error, message = "Message not given...") {
     console.log("-------------------------------------------------");
     console.log("WOAH! There was a mongoDB error, what a surprise!");
     console.log(`Message: ${message}`);
@@ -147,29 +174,35 @@ function mongoError(error, message = "") {
 
 function userExists(username) {
 
-    mongo.connect(url, (err, client) => {
+    collection.find({ username: username }).toArray((err, result) => {
+
         if (err) {
-            mongoError(err, "userExists - mongo.connect");
+            mongoError(err, "userExists - collection.find");
         }
 
-        const db = client.db(dbName);
-        const collection = db.collection("Users");
-        collection.find({ username: username }).toArray((err, result) => {
-
-            if (err) {
-                mongoError(err, "userExists - collection.find");
-            }
-
-            if (result.length > 0) {
-                client.close();
-                return true;
-            } else {
-                client.close();
-                return false;
-            }
-        })
+        if (result.length > 0) {
+            return true;
+        } else {
+            return false;
+        }
     })
 
+}
+
+function getUserFromDB(username) {
+    collection.find({ username: username }).toArray((err, result) => {
+
+        if (err) {
+            mongoError(err, "getUserFromDB - collection.find");
+        }
+
+        if (result.length > 1) {
+            mongoError(err, "getUserFromDB - collection.find returned more than one result for users");
+        } else {
+            return result[0];
+        }
+
+    })
 }
 
 function generateAccessToken(user) {
@@ -198,40 +231,20 @@ function getUser(token) {
     return User.name;
 }
 
+//TODO: ERROR HERE
 function addUserToDB(username, password) {
-    mongo.connect(url, (err, client) => {
+
+    console.log(1)
+
+    collection.insertOne({ username: username, password: password }, (err, result) => {
+        console.log(2)
+
         if (err) {
-            mongoError(err, "addUserToDB - mongo.connect");
+            mongoError(err, "addUserToDB - collection.insertOne");
         }
 
-        const db = client.db(dbName)
-        const collection = db.collection("Users")
+        console.log(result);
 
-        collection.insertOne({ username: username, password: password }, (err, result) => {
-
-            if (err) {
-                mongoError(err, "addUserToDB - collection.insertOne");
-            }
-
-            client.close()
-        })
-    })
-}
-
-function updateUsers() {
-    mongo.connect(url, (err, client) => {
-        if (err) {
-            mongoError(err, "updateUsers - mongo.connect");
-        }
-        const db = client.db(dbName);
-        const collection = db.collection("Users");
-        collection.find({}).toArray((err, result) => {
-            if (err) {
-                mongoError(err, "updateUsers - collection.find");
-            }
-            users = result
-            client.close();
-        })
     })
 }
 
@@ -291,6 +304,10 @@ function updateUsers() {
 
 
 // --------------------------------------
+
+// connect to the database
+
+var collection = openDBConnection();
 
 console.log("Server started on port 80");
 console.log("http://localhost:80");
