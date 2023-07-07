@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken')
 const mongo = require('mongodb').MongoClient
 const bcrypt = require('bcrypt')
 var cookieParser = require('cookie-parser')
-var https = require('node:https')
+var fs = require('node:fs')
 app.use(express.json())
 app.use(cookieParser())
 
@@ -18,7 +18,7 @@ async function startServer() {
     console.log("Starting server...");
 
     // Open Mongo Connection
-    var {client, db, users} = await connectDB();
+    const {client, db, users} = await connectDB();
 
     // Start Express Server
 
@@ -38,8 +38,9 @@ async function connectDB() {
 
     const db = client.db(dbName);
     const users = db.collection('Users');
+    const events = db.collection('Events');
 
-    return {client, db, users};
+    return {client, db, users, events};
 }
 
 async function registerPublicPages() {
@@ -177,11 +178,14 @@ async function registerAppPages(DBCollection) {
 
         console.log(username)
 
-        SSRUserPage(username, getUser(req.cookies.accessToken), DBCollection);
+        const userFile = await SSRUserPage(username, getUser(req.cookies.accessToken), DBCollection);
 
-        const data = await getUserFromDB(username, DBCollection);
+        if (userFile == null) {
+            res.status(500).json({ error: 'Something went wrong' })
+            return;
+        }
 
-        res.send(data);
+        res.send(userFile);
 
     });
 }
@@ -189,22 +193,32 @@ async function registerAppPages(DBCollection) {
 async function SSRUserPage(username, accessor, DBCollection) {
 
     if (userExists(username, DBCollection) == false)
-        return;
+        return null;
 
-    const permissionLevel = await userPermissions(accessor, DBCollection);
-
-    //const userPage = await getUserFromDB(username, DBCollection);
+    const permissionLevel = await userPermissions(username, accessor, DBCollection);
 
     switch (permissionLevel) {
         case 0:
+            console.log("Lowest permission");
+            break;
         case 1:
-            console.log("User is a volunteer");
+            console.log("Medium permission");
+            break;
         case 2:
-            console.log("User is a mod");
-        case 3:
-            console.log("User is an admin");
+            console.log("Highest permission");
+            break;
+        default:
+            console.log("Something went wrong");
+            return null;
     }
 
+    const DBdata = await getUserFromDB(username, DBCollection);
+
+    const userFile = fs.readFileSync('./app/user.html', 'utf8');
+
+    const file = userFile.replace(`"//...\\\\"`, JSON.stringify(DBdata[0]));
+
+    return file;
 
 }
 
@@ -226,14 +240,14 @@ async function userPermissions(username, accessingUsername, collection) {
         return 2;
     }
 
-    await getUserFromDB(username, collection).then((result) => {
-        if (result[0].user_type == 3) // 3 is admin, 2 is moderator, 1 is organization, 0 is volunteer
-            return 2;
-        else if (result[0].user_type == 2)
-            return 1;
+    const result = await getUserFromDB(username, collection)
 
-        return 0;
-    })
+    if (result[0].user_type == 3) // 3 is admin, 2 is moderator, 1 is organization, 0 is volunteer
+        return 2;
+    else if (result[0].user_type == 2)
+        return 1;
+
+    return 0;
 
     return false;
 }
@@ -268,21 +282,11 @@ function addUserToDB(username, password, email, phoneNumber, userType, collectio
     })
 }
 
-function getUserFromDB(username, collection) {
-    return collection.find({ username: username }).toArray();
-    // return collection.find({ username: username }).toArray((err, result) => {
+async function getUserFromDB(username, collection) {
+    const data = await collection.find({ username: username }).toArray().then(data=>data).catch(err=>err);
 
-    //     if (err) {
-    //         mongoError(err, "getUserFromDB - collection.find");
-    //     }
+    return data;
 
-    //     if (result.length > 1) {
-    //         mongoError(err, "getUserFromDB - collection.find returned more than one result for users");
-    //     } else {
-    //         return result;
-    //     }
-
-    // })
 }
 
 function generateAccessToken(user) {
