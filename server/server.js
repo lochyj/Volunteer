@@ -176,8 +176,6 @@ async function registerAppPages(DBCollection) {
             res.redirect('/app/');
         }
 
-        console.log(username)
-
         const userFile = await SSRUserPage(username, getUser(req.cookies.accessToken), DBCollection);
 
         if (userFile == null) {
@@ -197,26 +195,16 @@ async function SSRUserPage(username, accessor, DBCollection) {
 
     const permissionLevel = await userPermissions(username, accessor, DBCollection);
 
-    switch (permissionLevel) {
-        case 0:
-            console.log("Lowest permission");
-            break;
-        case 1:
-            console.log("Medium permission");
-            break;
-        case 2:
-            console.log("Highest permission");
-            break;
-        default:
-            console.log("Something went wrong");
-            return null;
-    }
-
     const DBdata = await getUserFromDB(username, DBCollection);
+
+    const cleanDBData = filterUserdata(DBdata[0], permissionLevel);
+
+    if (cleanDBData == null)
+        return null;
 
     const userFile = fs.readFileSync('./app/user.html', 'utf8');
 
-    const file = userFile.replace(`"//...\\\\"`, JSON.stringify(DBdata[0]));
+    const file = userFile.replace(`"//..%&&%..//"`, JSON.stringify(cleanDBData));
 
     return file;
 
@@ -253,6 +241,28 @@ async function userPermissions(username, accessingUsername, collection) {
 }
 
 function filterUserdata(userdata, permissionLevel) {
+    switch (permissionLevel) {
+        case 0:
+            userdata.email = "";
+            userdata.phone_number = "";
+            userdata.password = "";
+            break;
+        case 1:
+            userdata.email = "";
+            userdata.phone_number = "";
+            userdata.password = "";
+            break;
+        case 2:
+            // TODO: add something to tell the user page that they can change their password
+            userdata.password = "";
+            break;
+        default:
+            console.log("Something went wrong at filtering user data");
+            userdata = null;
+            return userdata;
+    }
+
+    return userdata;
 
 }
 
