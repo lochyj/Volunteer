@@ -10,6 +10,22 @@ var fs = require('node:fs')
 app.use(express.json())
 app.use(cookieParser())
 
+// import functions from database.js as *
+const {
+    addEventToDB,
+    getEventFromDB,
+    userExists,
+    eventExists,
+    addUserToDB,
+    getUserFromDB
+} = require('./database.js')
+
+const {
+    SSRUserPage,
+    SSREventsPage,
+    SSRErrorPage
+} = require('./ssr.js')
+
 const url = 'mongodb://127.0.0.1:27017/'
 const dbName = 'Volunteer'
 const serveRoot = "C:\\Users\\lochy\\OneDrive\\Documents\\GitHub\\Volunteer"
@@ -18,7 +34,7 @@ async function startServer() {
     console.log("Starting server...");
 
     // Open Mongo Connection
-    const {client, db, users} = await connectDB();
+    const {client, db, users, events} = await connectDB();
 
     // Start Express Server
 
@@ -26,7 +42,9 @@ async function startServer() {
 
     registerAuthPages(users);
 
-    registerAppPages(users);
+    registerAppPages(users, events);
+
+	registerAPIEndpoints(users, events);
 
     console.log("HTTP server started on port 80");
     console.log("http://localhost:80/");
@@ -155,7 +173,42 @@ async function registerAuthPages(DBCollection) {
 
 }
 
-async function registerAppPages(DBCollection) {
+async function registerAPIEndpoints(userCollection, eventCollection) {
+    app.post('/api/event/create', authenticateToken, async (req, res) => {
+        if (
+            !req.body.title ||
+            !req.body.description ||
+            !req.body.location ||
+            !req.body.date ||
+            !req.body.time ||
+			!req.body.tags
+        ) {
+            res.status(400).json({
+                message: "Please provide all required fields"
+            });
+
+            return;
+        }
+
+        const user = getUserFromDB(getUser(req.cookies.accessToken), userCollection);
+        const permissionLevel = user[0].user_type;
+
+        if (permissionLevel == 0) {
+            res.status(403).json({
+                message: "You do not have permission to create events"
+            });
+        }
+
+        const { title, description, location, date, time, tags } = req.body;
+
+        addEventToDB(title, description, date, time, location, user.username, tags, eventCollection);
+
+        res.sendStatus(200);
+
+    });
+}
+
+async function registerAppPages(userCollection, eventCollection) {
 
     app.get('/app/', authenticateToken, (req, res) => {
         res.sendFile('./app/homepage.html', { root: serveRoot })
@@ -169,6 +222,10 @@ async function registerAppPages(DBCollection) {
         res.sendFile('./app/settings.html', { root: serveRoot })
     });
 
+    app.get('/app/create/', authenticateToken, (req, res) => {
+        res.sendFile('./app/createEvent.html', { root: serveRoot })
+    });
+
     app.get('/app/user/:username/', authenticateToken, async (req, res) => {
         const username = req.params.username;
 
@@ -176,7 +233,7 @@ async function registerAppPages(DBCollection) {
             res.redirect('/app/');
         }
 
-        const userFile = await SSRUserPage(username, getUser(req.cookies.accessToken), DBCollection);
+        const userFile = await SSRUserPage(username, getUser(req.cookies.accessToken), userCollection);
 
         if (userFile == null) {
             res.status(500).json({ error: 'Something went wrong' })
@@ -186,28 +243,24 @@ async function registerAppPages(DBCollection) {
         res.send(userFile);
 
     });
-}
 
-async function SSRUserPage(username, accessor, DBCollection) {
+    app.get('/app/event/:event/', authenticateToken, async (req, res) => {
+        const event = req.params.event;
 
-    if (userExists(username, DBCollection) == false)
-        return null;
+        if (!event) {
+            res.redirect('/app/');
+        }
 
-    const permissionLevel = await userPermissions(username, accessor, DBCollection);
+        const eventPage = await SSREventsPage(event, eventCollection);
 
-    const DBdata = await getUserFromDB(username, DBCollection);
+        if (eventPage == null) {
+            res.status(500).json({ error: 'Something went wrong' })
+            return;
+        }
 
-    const cleanDBData = filterUserdata(DBdata[0], permissionLevel);
+        res.send(eventPage);
 
-    if (cleanDBData == null)
-        return null;
-
-    const userFile = fs.readFileSync('./app/user.html', 'utf8');
-
-    const file = userFile.replace(`"//..%&&%..//"`, JSON.stringify(cleanDBData));
-
-    return file;
-
+    });
 }
 
 function getUser(token) {
@@ -263,39 +316,6 @@ function filterUserdata(userdata, permissionLevel) {
     }
 
     return userdata;
-
-}
-
-async function userExists(username, collection) {
-    const arr = await collection.find({ username: username }).toArray();
-
-    if (arr.length > 0) {
-        return true;
-    } else if (arr.length == 0) {
-        return false;
-    } else {
-        return null;
-    }
-
-}
-
-function addUserToDB(username, password, email, phoneNumber, userType, collection) {
-
-    collection.insertOne({ username: username, password: password, email: email, phone_number: phoneNumber, user_type: userType }, (err, result) => {
-
-        if (err) {
-            mongoError(err, "addUserToDB - collection.insertOne");
-        }
-
-        console.log(result);
-
-    })
-}
-
-async function getUserFromDB(username, collection) {
-    const data = await collection.find({ username: username }).toArray().then(data=>data).catch(err=>err);
-
-    return data;
 
 }
 

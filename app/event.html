@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event</title>
+</head>
+<body>
+    <div>
+        <div id="event">
+
+        </div>
+    </div>
+    <script>
+        var event = "//..%&&%..//"
+        // event_name:
+        // event_description:
+        // event_date:
+        // event_time:
+        // event_location:
+        // event_type:
+        // event_organizer:
+
+        var eventDiv = document.getElementById("event");
+
+        eventDiv.innerHTML = `
+            <h1>${event.event_name}</h1>
+            <h2>${event.event_description}</h2>
+            <h3>${event.event_date}</h3>
+            <h4>${event.event_time}</h4>
+            <h5>${event.event_location}</h5>
+            <h6>${event.event_type}</h6>
+            <h7>${event.event_organizer}</h7>
+        `;
+        
+        document.title = event.event_name;
+    </script>
+</body>
+</html>
