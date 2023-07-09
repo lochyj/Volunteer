@@ -1,3 +1,14 @@
+const {
+    addEventToDB,
+    getEventFromDB,
+    userExists,
+    eventExists,
+    addUserToDB,
+    getUserFromDB
+} = require('./database.js')
+
+var fs = require('node:fs')
+
 
 async function SSRUserPage(username, accessor, DBCollection) {
 
@@ -33,11 +44,11 @@ async function SSRUserPage(username, accessor, DBCollection) {
 async function SSREventsPage(event, eventsCollection) {
 
     if (eventExists(event, eventsCollection) == false) {
-        const file = SSRErrorPage("Event doesn't exist")
+        const file = SSRErrorPage("Event doesn't exist.")
         return file;
     }
 
-    const eventData = await getEventFromDB(username, DBCollection);
+    const eventData = await getEventFromDB(event, eventsCollection);
 
 
     if (eventData == null) {
@@ -48,7 +59,7 @@ async function SSREventsPage(event, eventsCollection) {
 
     const eventFile = fs.readFileSync('./app/event.html', 'utf8');
 
-    const file = eventFile.replace(`"//..%&&%..//"`, JSON.stringify(eventData));
+    const file = eventFile.replace(`"//..%&&%..//"`, JSON.stringify(eventData[0]));
 
     return file;
 

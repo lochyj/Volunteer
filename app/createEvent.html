@@ -152,17 +152,12 @@
             })
             .then(res => res.json())
             .then(data => {
-                if (data.success) {
-                    alert("Event created successfully!");
-                    window.location.href = "/event/" + data.event_id;
+                if (data.event_id) {
+                    window.location.href = "/app/event/" + data.event_id;
                 } else {
-                    alert("Error: " + data.message);
+                    warn.innerText = "Something went wrong on our end. Please try again later.";
                 }
             })
-            .catch(err => {
-                console.log(err);
-                alert("Error: " + err);
-            });
         });
 
     </script>

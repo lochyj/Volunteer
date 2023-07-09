@@ -6,11 +6,10 @@ const jwt = require('jsonwebtoken')
 const mongo = require('mongodb').MongoClient
 const bcrypt = require('bcrypt')
 var cookieParser = require('cookie-parser')
-var fs = require('node:fs')
+const uuid = require("node:crypto").randomUUID
 app.use(express.json())
 app.use(cookieParser())
 
-// import functions from database.js as *
 const {
     addEventToDB,
     getEventFromDB,
@@ -190,7 +189,7 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
             return;
         }
 
-        const user = getUserFromDB(getUser(req.cookies.accessToken), userCollection);
+        const user = await getUserFromDB(getUser(req.cookies.accessToken), userCollection);
         const permissionLevel = user[0].user_type;
 
         if (permissionLevel == 0) {
@@ -201,9 +200,11 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
 
         const { title, description, location, date, time, tags } = req.body;
 
-        addEventToDB(title, description, date, time, location, user.username, tags, eventCollection);
+        const event_id = uuid();
 
-        res.sendStatus(200);
+        addEventToDB(title, description, date, time, location, getUser(req.cookies.accessToken), tags, event_id, eventCollection);
+
+        res.send({event_id: event_id}).status(200);
 
     });
 }
@@ -245,13 +246,13 @@ async function registerAppPages(userCollection, eventCollection) {
     });
 
     app.get('/app/event/:event/', authenticateToken, async (req, res) => {
-        const event = req.params.event;
+        const event_id = req.params.event;
 
-        if (!event) {
+        if (!event_id) {
             res.redirect('/app/');
         }
 
-        const eventPage = await SSREventsPage(event, eventCollection);
+        const eventPage = await SSREventsPage(event_id, eventCollection);
 
         if (eventPage == null) {
             res.status(500).json({ error: 'Something went wrong' })

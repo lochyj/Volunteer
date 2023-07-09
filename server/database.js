@@ -10,10 +10,13 @@ async function addEventToDB(
     event_location,
     event_creator,
     event_tags,
+    event_uuid,
     DBCollection
 ) {
 
+
     const event = {
+        event_id: event_uuid,
         event_name: event_name,
         event_description: event_description,
         event_date: event_date,
@@ -23,7 +26,9 @@ async function addEventToDB(
         event_creator: event_creator
     }
 
-    await DBCollection.insertOne(event);
+
+    DBCollection.insertOne(event);
+
 }
 
 async function getEventFromDB(event_id, DBCollection) {

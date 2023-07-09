@@ -15,3 +15,4 @@ volunteer.com.au interface
 
 //TODO: probably remove refresh tokens as they arent really used...
 //TODO: make 404 and 401 pages
+// TODO: migrate away from usernames and towards uuids
