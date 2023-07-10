@@ -189,7 +189,9 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
             return;
         }
 
-        const user = await getUserFromDB(getUser(req.cookies.accessToken), userCollection);
+        const username = getUser(req.cookies.accessToken);
+
+        const user = await getUserFromDB(username, userCollection);
         const permissionLevel = user[0].user_type;
 
         if (permissionLevel == 0) {
@@ -202,7 +204,9 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
 
         const event_id = uuid();
 
-        addEventToDB(title, description, date, time, location, getUser(req.cookies.accessToken), tags, event_id, eventCollection);
+        addEventToDB(title, description, date, time, location, username, tags, event_id, eventCollection);
+
+        addEventToUserDB(event_id, username, userCollection);
 
         res.send({event_id: event_id}).status(200);
 

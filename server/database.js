@@ -49,6 +49,10 @@ async function userExists(username, collection) {
 
 }
 
+async function addEventToUserDB(event_id, user, collection) {
+    collection.updateOne({ username: user }, { $push: { events: event_id } });
+}
+
 async function eventExists(event_id, collection) {
     const arr = await collection.find({ event_id: event_id }).toArray();
 

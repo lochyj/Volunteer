@@ -49,6 +49,15 @@
             margin: 3px;
             font-size: 0.9em;
         }
+
+        #date_from, #date_to {
+            width: calc((94%/2) - 27.2px);
+            display: inline;
+        }
+        #time_from, #time_to {
+            width: calc((94%/2) - 27.2px);
+            display: inline;
+        }
         
         .form button {
             width: 100%;
@@ -81,22 +90,14 @@
 
                 <textarea id="description" placeholder="Description"></textarea><br>
 
-                <label for="date_from">Date from</label><br>
-                <input type="date" id="date_from"><br>
+                <input type="date" id="date_from"><label> to </label><input type="date" id="date_to"><br>
 
-                <label for="date_to">Date to</label><br>
-                <input type="date" id="date_to"><br>
-
-                <label for="time_from">Time from</label><br>
-                <input type="time" id="time_from"><br>
-
-                <label for="time_to">Time to</label><br>
-                <input type="time" id="time_to"><br>
+                <input type="time" id="time_from"><label> to </label><input type="time" id="time_to"><br>
 
                 <input type="text" id="location" placeholder="Location"><br><br>
 
                 <span for="type">
-                    Examples:
+                    Example tags:
                         <span class="tag">sport</span>
                         <span class="tag">fundraising</span>
                 </span><br>

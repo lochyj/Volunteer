@@ -1,56 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter&family=Lalezar&display=swap');
-    * {
-      margin: 0;
-      padding: 0;
-      font-family: 'Inter', sans-serif;
-    }
-    body {
-      background-color: #FFF;
-    }
-
-    #feed {
-      width: 80%;
-      margin: 0 auto;
-      margin-top: 20px;
-    }
-
-    .event {
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 15px;
-      margin-bottom: 20px;
-      border: 1px solid #ccc;
-    }
-
-    .event h2 {
-      margin-bottom: 10px;
-      font-family: 'Lalezar', cursive;
-      font-size: 40px;
-    }
-
-    .event h4 {
-      margin-bottom: 10px;
-      display: inline-block;
-      padding: 10px;
-      margin-right: 20px;
-      border-right: #ccc 2px solid;
-      border-left: #ccc 2px solid;
-    }
-
-    .event p {
-      margin-bottom: 10px;
-    }
-
-    .location {
-      display: inline-flex;
-      font-size: 20px;
-    }
-
-  </style>
+  <link rel="stylesheet" href="/global.css">
 </head>
 <body>
   <header>
@@ -58,7 +9,7 @@
   </header>
   <div>
     Content:
-    <div id="feed">
+    <div id="feed" class="eventsFeed">
 
     </div>
   </div>
@@ -83,11 +34,11 @@
       // TODO: make this more secure
       event.innerHTML += `
         <h2>${data.event}</h2>
+        <p class="tab"><img width="20px" hight="20px" src="/location_icon.svg"><img>${data.location}</p>
+        <p class="tab"><img width="20px" hight="20px" src="/organization_icon.svg">${data.user}</p>
         <h4>${data.date[0]} - ${data.date[1]}</h4>
         <h4>${data.time[0]} - ${data.time[1]}</h4>
         <p>${data.description}</p>
-        <div class="location"><img width="30px" hight="30px" src="/location_icon.svg"><img><p>${data.location}</p></div>
-        <p>${data.user}</p>
       `;
       feed.appendChild(event);
     }
