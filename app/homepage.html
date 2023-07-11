@@ -33,11 +33,11 @@
 
       // TODO: make this more secure
       event.innerHTML += `
-        <h2>${data.event}</h2>
-        <p class="tab"><img width="20px" hight="20px" src="/location_icon.svg"><img>${data.location}</p>
-        <p class="tab"><img width="20px" hight="20px" src="/organization_icon.svg">${data.user}</p>
-        <h4>${data.date[0]} - ${data.date[1]}</h4>
-        <h4>${data.time[0]} - ${data.time[1]}</h4>
+        <h2>${data.event_name}</h2>
+        <p class="tab"><img width="20px" hight="20px" src="/location_icon.svg"><img>${data.event_location}</p>
+        <p class="tab"><img width="20px" hight="20px" src="/organization_icon.svg">${data.event_organizer}</p>
+        <h4>${data.event_date[0]} - ${data.event_date[1]}</h4>
+        <h4>${data.event_time[0]} - ${data.event_time[1]}</h4>
         <p>${data.description}</p>
       `;
       feed.appendChild(event);

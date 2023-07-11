@@ -36,6 +36,11 @@ async function getEventFromDB(event_id, DBCollection) {
     return event;
 }
 
+async function getEventsFromDB(number, eventCollection) {
+    const events = await eventCollection.find().limit(number).toArray();
+    return events;
+}
+
 async function userExists(username, collection) {
     const arr = await collection.find({ username: username }).toArray();
 
@@ -92,5 +97,6 @@ module.exports = {
     userExists,
     eventExists,
     addUserToDB,
-    getUserFromDB
+    getUserFromDB,
+    getEventsFromDB
 };

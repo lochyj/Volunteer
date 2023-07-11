@@ -16,7 +16,8 @@ const {
     userExists,
     eventExists,
     addUserToDB,
-    getUserFromDB
+    getUserFromDB,
+    getEventsFromDB
 } = require('./database.js')
 
 const {
@@ -44,6 +45,10 @@ async function startServer() {
     registerAppPages(users, events);
 
 	registerAPIEndpoints(users, events);
+
+    app.use((req, res, next) => {
+        res.sendFile('./pages/404.html', { root: serveRoot })
+    });
 
     console.log("HTTP server started on port 80");
     console.log("http://localhost:80/");
@@ -211,6 +216,83 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
         res.send({event_id: event_id}).status(200);
 
     });
+
+    app.get("/api/user/:username/", authenticateToken, async (req, res) => {
+        const username = req.params.username;
+
+        if (!username || username == null || username == undefined || username == '') {
+            res.send(400).json({ error: 'Please provide a username' })
+            return;
+        }
+
+        if (await userExists(username, userCollection) == false) {
+            res.sendStatus(404);
+            return;
+        }
+
+        const accessor = getUser(req.cookies.accessToken);
+
+        const permissionLevel = await userPermissions(username, accessor, userCollection);
+
+        const DBdata = await getUserFromDB(username, userCollection);
+
+        if (DBdata == null) {
+            console.log("Something went wrong with getting userdata from the db");
+            res.sendStatus(500);
+            return;
+        }
+
+        const cleanDBData = filterUserdata(DBdata[0], permissionLevel);
+
+        if (cleanDBData == null) {
+            console.log("Something went from with cleaning the userdata");
+            res.sendStatus(500);
+            return;
+        }
+
+        res.send(cleanDBData).status(200);
+
+    })
+
+    app.get("/api/event/:event_id/", authenticateToken, async (req, res) => {
+        const event_id = req.params.event_id;
+
+        if (!event_id || event_id == null || event_id == undefined || event_id == '') {
+            res.send(400).json({ error: 'Please provide an event_id' })
+        }
+
+        if (eventExists(event_id, eventCollection) == false) {
+            res.sendStatus(404);
+        }
+
+        const DBdata = await getEventFromDB(event_id, eventCollection);
+
+        if (DBdata == null) {
+            console.log("Something went wrong with getting eventdata from the db");
+            res.sendStatus(500);
+        }
+
+        res.send(DBdata[0]).status(200);
+
+    })
+
+    app.get("/api/events/:number/", authenticateToken, async (req, res) => {
+        const number = req.params.number;
+
+        if (!number || number == null || number == undefined || number == '') {
+            res.send(400).json({ error: 'Please provide a number' })
+        }
+
+        const DBdata = await getEventsFromDB(number, eventCollection);
+
+        if (DBdata == null) {
+            console.log("Something went wrong with getting eventdata from the db");
+            res.sendStatus(500);
+        }
+
+        res.send(DBdata).status(200);
+
+    })
 }
 
 async function registerAppPages(userCollection, eventCollection) {
@@ -231,47 +313,21 @@ async function registerAppPages(userCollection, eventCollection) {
         res.sendFile('./app/createEvent.html', { root: serveRoot })
     });
 
-    app.get('/app/user/:username/', authenticateToken, async (req, res) => {
-        const username = req.params.username;
-
-        if (!username) {
-            res.redirect('/app/');
-        }
-
-        const userFile = await SSRUserPage(username, getUser(req.cookies.accessToken), userCollection);
-
-        if (userFile == null) {
-            res.status(500).json({ error: 'Something went wrong' })
-            return;
-        }
-
-        res.send(userFile);
-
+    app.get("/app/user/*", authenticateToken, async (req, res) => {
+        res.sendFile('./app/user.html', { root: serveRoot })
     });
 
-    app.get('/app/event/:event/', authenticateToken, async (req, res) => {
-        const event_id = req.params.event;
-
-        if (!event_id) {
-            res.redirect('/app/');
-        }
-
-        const eventPage = await SSREventsPage(event_id, eventCollection);
-
-        if (eventPage == null) {
-            res.status(500).json({ error: 'Something went wrong' })
-            return;
-        }
-
-        res.send(eventPage);
-
+    app.get("/app/event/*", authenticateToken, async (req, res) => {
+        res.sendFile('./app/event.html', { root: serveRoot })
     });
 }
 
 function getUser(token) {
     let User;
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-        if (err) return null;
+        if (err)
+            return null;
+
         User = user;
     })
     return User.name;
@@ -299,25 +355,26 @@ async function userPermissions(username, accessingUsername, collection) {
 }
 
 function filterUserdata(userdata, permissionLevel) {
+
+    // We always want to delete the password from the data as even the user should have access to the hashed password.
+    delete userdata["password"]
+
     switch (permissionLevel) {
         case 0:
-            userdata.email = "";
-            userdata.phone_number = "";
-            userdata.password = "";
+            delete userdata["email"]
+            delete userdata["phone_number"]
             break;
         case 1:
-            userdata.email = "";
-            userdata.phone_number = "";
-            userdata.password = "";
+            delete userdata["email"]
+            delete userdata["phone_number"]
             break;
         case 2:
             // TODO: add something to tell the user page that they can change their password
-            userdata.password = "";
             break;
         default:
             console.log("Something went wrong at filtering user data");
             userdata = null;
-            return userdata;
+            break;
     }
 
     return userdata;

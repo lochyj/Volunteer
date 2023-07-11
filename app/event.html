@@ -11,22 +11,32 @@
 
         </div>
     </div>
+    <script src="/global.js"></script>
     <script>
-        var event = "//..%&&%..//"
+        const eventDiv = document.getElementById("event");
+        var url = window.location.pathname;
 
-        var eventDiv = document.getElementById("event");
+        var urlSplit = url.split("/");
 
-        eventDiv.innerHTML = `
-            <h1>${event.event_name}</h1>
-            <p>${event.event_description}</p>
-            <h3>${event.event_date}</h3>
-            <h3>${event.event_time}</h3>
-            <h3>${event.event_location}</h3>
-            <h3>${event.event_tags}</h3>
-            <h3>${event.event_creator}</h3>
-        `;
+        if (urlSplit.length < 3) {
+            window.location.href = "/app/homepage.html";
+        }
 
-        document.title = event.event_name;
+        var id = urlSplit[3];
+
+        fetch(`/api/event/${id}/`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+
+                if (data.error) {
+                    window.location.href = "/app/homepage.html";
+                }
+                else {
+                    displayEvent(data, eventDiv);
+                }
+            });
+
     </script>
 </body>
 </html>

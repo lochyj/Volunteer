@@ -8,49 +8,37 @@
 <body>
     <div>
         User Page
-        <div id="userData">
+        <div id="userDiv">
 
         </div>
     </div>
+    <script src="/global.js"></script>
     <script>
-        var user = "//..%&&%..//"
+        const userDiv = document.getElementById("userDiv");
+        var url = window.location.pathname;
 
-        // username:
-        // email:
-        // phone_number:
-        //user_type:
+        var urlSplit = url.split("/");
 
-        var userData = document.getElementById("userData");
-        var user_type = user.user_type;
-        switch (user.user_type) {
-            case 0:
-                user_type = "Volunteer";
-            case 1:
-                user_type = "Organization";
-            case 2:
-                user_type = "Moderator";
-            case 3:
-                user_type = "Admin";
+        if (urlSplit.length < 3) {
+            window.location.href = "/app/homepage.html";
         }
 
-        if (user.user_type == 1) {
-            // Add posts here
-            userData.innerHTML = `
-                <h1>${user.username}</h1>
-                <h2>${user.email}</h2>
-                <h3>${user.phone_number}</h3>
-                <h4>${user.user_type}</h4>
-            `;
-        } else {
-            userData.innerHTML = `
-                <h1>${user.username}</h1>
-                <h2>${user.email}</h2>
-                <h3>${user.phone_number}</h3>
-                <h4>${user.user_type}</h4>
-            `;
-        }
+        var id = urlSplit[3];
 
-        document.title = user.username;
+        console.log("sent")
+
+        fetch(`/api/user/${id}/`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+
+                if (data.error) {
+                    window.location.href = "/app/homepage.html";
+                }
+                else {
+                    displayUser(data, userDiv);
+                }
+            });
 
     </script>
 </body>
