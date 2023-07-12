@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create new event | Volunteer</title>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
     <style>
         * {
             margin: 0;
@@ -20,6 +22,7 @@
             margin: 0 auto;
             margin-top: 50px;
             background-color: #fff;
+            border: 1px solid #ccc;
             padding: 20px;
             border-radius: 5px;
         }
@@ -50,12 +53,12 @@
             font-size: 0.9em;
         }
 
-        #date_from, #date_to {
-            width: calc((94%/2) - 27.2px);
+        .date {
+            width: calc((94%/2) - 27.2px) !important;
             display: inline;
         }
-        #time_from, #time_to {
-            width: calc((94%/2) - 27.2px);
+        .time {
+            width: calc((94%/2) - 27.2px) !important;
             display: inline;
         }
         
@@ -65,9 +68,16 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             margin: 3px;
-            background-color: #00684A;
+            background-color: #4CAF50;
             color: #fff;
             font-size: 16px;
+        }
+        .form select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin: 3px;
         }
         .important {
             color: red;
@@ -79,10 +89,25 @@
             margin: 5px;
             justify-content: center;
         }
+        #mapBox {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            margin: 20px;
+            border-radius: 10px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 20px;
+        }
+        #map {
+            border-radius: 10px;
+            margin-top: 10px;
+        }
     </style>
+
 </head>
 <body>
-    <div>
+    <div class="wrapper">
         <div class="content">
             <h1>Create new event</h1>
             <div id="form" class="form">
@@ -90,31 +115,60 @@
 
                 <textarea id="description" placeholder="Description"></textarea><br>
 
-                <input type="date" id="date_from"><label> to </label><input type="date" id="date_to"><br>
+                <select id="commitment_type" name="commitment">
+                    <option value="" disabled selected hidden>Volunteer commitment | Select one</option>
+                    <option value="once">One Off</option>
+                    <option value="week">Weekly</option>
+                    <option value="fortnight">Fortnightly</option>
+                    <option value="month">Monthly</option>
+                </select>
 
-                <input type="time" id="time_from"><label> to </label><input type="time" id="time_to"><br>
+                <!-- Commitment: just once -->
+                    <input data-show="once" type="date" id="oncedate1" class="date">
+                    <span data-show="once">to</span>
+                    <input data-show="once" type="date" id="oncedate2" class="date">
 
-                <input type="text" id="location" placeholder="Location"><br><br>
+                    <br data-show="once">
 
-                <span for="type">
-                    Example tags:
-                        <span class="tag">sport</span>
-                        <span class="tag">fundraising</span>
-                </span><br>
-                <input type="text" name="type" id="type" placeholder="Tags"><br>
+                    <input data-show="once" type="time" id="oncetime1" class="time">
+                    <span data-show="once">to</span>
+                    <input data-show="once" type="time" id="oncetime2" class="time">
 
-                <button id="submit">Submit</button><br>
+                    <br data-show="once">
+                <!--  -->
+
+                <!-- Commitment: not once -->
+                    <input data-show="notonce" type="date" id="date1" class="date">
+                    <span data-show="notonce">to</span>
+                    <input data-show="notonce" type="date" id="date2" class="date">
+                    <br data-show="notonce" >
+                <!--  -->
+
+                <input disabled id="location" placeholder="Location"><br>
+
+                <input type="text" name="type" id="type" placeholder="Event tags | E.g: Sport, Fundraising"><br>
+
+                <button id="submit">Create Event</button><br>
 
                 <span id="warn" class="important"></span>
 
             </div>
         </div>
+        <div id="mapBox">
+            <span><b>Select event location:</b></span>
+            <div id='map' style='width: 400px; height: 300px;'></div>
+        </div>
+    </div>
+    <script src="/keys.js"></script>
     <script>
         const form = document.getElementById("form");
 
         const warn = document.getElementById("warn");
 
         const submit = document.getElementById("submit");
+
+        const commitment = document.getElementById("commitment_type");
+
 
         // TODO: get map api working for location selection
 
@@ -130,7 +184,7 @@
             const location = document.getElementById("location").value;
             const type = document.getElementById("type").value;
 
-            if (!name || !description || !date_from || !date_to || !time_from || !time_to || !location || !type) {
+            if (!name || !description || !date_from || !date_to || !time_from || !time_to || !location || !type || longlat[0] == null || longlat[1] == null) {
                 warn.innerText = "Please fill in all fields.";
                 return;
             }
@@ -160,6 +214,84 @@
                 }
             })
         });
+
+
+        mapboxgl.accessToken = mapboxAccessToken;
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11'
+        });
+
+        var makerList = [];
+
+        map.on("click", function(e){
+            const marker = new mapboxgl.Marker()
+                .setLngLat([e.lngLat.lng, e.lngLat.lat])
+                .addTo(map);
+
+            if (makerList.length > 0) {
+                makerList[0].remove();
+                makerList = [];
+            }
+
+            makerList.push(marker);
+
+            fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${e.lngLat.lng},${e.lngLat.lat}.json` +
+                `?access_token=${mapboxAccessToken}`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("location").value = data.features[0].place_name;
+                });
+
+        });
+
+        const once = document.querySelectorAll("[data-show=once]");
+        const notonce = document.querySelectorAll("[data-show=notonce]");
+
+        for (let i = 0; i < once.length; i++) {
+            once[i].hidden = true;
+            once[i].disabled = true;
+            once[i].style.display = "none";
+        }
+
+        for (let i = 0; i < notonce.length; i++) {
+            notonce[i].hidden = true;
+            notonce[i].disabled = true;
+            once[i].style.display = "none";
+        }
+
+        commitment.addEventListener("click", function(e) {
+
+            if (e.target.value == "once") {
+                for (let i = 0; i < once.length; i++) {
+                    once[i].hidden = false;
+                    once[i].disabled = false;
+                    once[i].style.display = "inline";
+                }
+
+                for (let i = 0; i < notonce.length; i++) {
+                    notonce[i].hidden = true;
+                    notonce[i].disabled = true;
+                    once[i].style.display = "none";
+
+                }
+            } else if (e.target.value == "week" || e.target.value == "fortnight" || e.target.value == "month") {
+                for (let i = 0; i < once.length; i++) {
+                    once[i].hidden = true;
+                    once[i].disabled = true;
+                    once[i].style.display = "none";
+                }
+
+                for (let i = 0; i < notonce.length; i++) {
+                    notonce[i].hidden = false;
+                    notonce[i].disabled = false;
+                    once[i].style.display = "inline";
+                }
+            }
+        })
+
+
+
 
     </script>
 </body>
