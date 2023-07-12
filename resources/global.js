@@ -46,3 +46,18 @@ function displayUser(user, userDiv) {
 
         document.title = user.username;
 }
+
+function addEvent(data, feedDiv) {
+    const event = document.createElement("div");
+    event.classList.add("event");
+
+    // TODO: make this more secure
+    event.innerHTML += `
+        <h2>${data.event_name}</h2>
+        <p class="tab"><img width="20px" hight="20px" src="/location_icon.svg"><img>${data.event_location}</p>
+        <p class="tab"><img width="20px" hight="20px" src="/organization_icon.svg">${data.event_creator}</p>
+        <h4>${data.event_date[0]} - ${data.event_date[1]}</h4>
+        <h4>${data.event_time[0]} - ${data.event_time[1]}</h4>
+    `;
+    feedDiv.appendChild(event);
+}

@@ -13,37 +13,19 @@
 
     </div>
   </div>
-
+  <script src="/global.js"></script>
   <script>
-    let tempData = {
-      "event": "Red Cross Blood Drive Setup",
-      "location": "Noble Park Sporting Grounds",
-      "date": ["10/4/23", "6/5/23"],
-      "time": ["10:30 AM", "3:30 PM"],
-      "description": "We need people to help setup the blood drive.",
-      "user": "Red Cross"
-    }
-
+    const limit = 10;
     const feed = document.getElementById("feed");
 
-    function addEvent(data) {
-      const event = document.createElement("div");
-
-      event.classList.add("event");
-
-      // TODO: make this more secure
-      event.innerHTML += `
-        <h2>${data.event_name}</h2>
-        <p class="tab"><img width="20px" hight="20px" src="/location_icon.svg"><img>${data.event_location}</p>
-        <p class="tab"><img width="20px" hight="20px" src="/organization_icon.svg">${data.event_organizer}</p>
-        <h4>${data.event_date[0]} - ${data.event_date[1]}</h4>
-        <h4>${data.event_time[0]} - ${data.event_time[1]}</h4>
-        <p>${data.description}</p>
-      `;
-      feed.appendChild(event);
-    }
-
-    addEvent(tempData);
+    fetch(`/api/events/${limit}`)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        data.forEach(event => {
+          addEvent(event, feed);
+        });
+      });
 
   </script>
 </body>

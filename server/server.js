@@ -25,6 +25,7 @@ const {
     SSREventsPage,
     SSRErrorPage
 } = require('./ssr.js')
+const { isNumberObject } = require('node:util/types')
 
 const url = 'mongodb://127.0.0.1:27017/'
 const dbName = 'Volunteer'
@@ -146,7 +147,7 @@ async function registerAuthPages(DBCollection) {
 
         if (!username || !password)
             return res.status(401).json({ error: 'Please provide a username and / or password' });
-    
+
         const doesUsernameExist = await userExists(username, DBCollection);
 
         if (doesUsernameExist == true) {
@@ -155,7 +156,7 @@ async function registerAuthPages(DBCollection) {
             const storedHashedPassword = userCredentials[0].password
 
             const passwordIsValid = await bcrypt.compare(password, storedHashedPassword)
-    
+
             if (passwordIsValid) {
                 const accessToken = generateAccessToken({ name: username })
                 const refreshToken = jwt.sign({ name: username }, process.env.REFRESH_TOKEN_SECRET)
@@ -277,9 +278,9 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
     })
 
     app.get("/api/events/:number/", authenticateToken, async (req, res) => {
-        const number = req.params.number;
+        const number = Number(req.params.number);
 
-        if (!number || number == null || number == undefined || number == '') {
+        if (!number || number == null || number == undefined || number == '' || isNaN(number)) {
             res.send(400).json({ error: 'Please provide a number' })
         }
 

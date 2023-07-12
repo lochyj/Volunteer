@@ -14,5 +14,5 @@ Other: #001E2B
 volunteer.com.au interface
 
 //TODO: probably remove refresh tokens as they arent really used...
-//TODO: make 404 and 401 pages
 // TODO: migrate away from usernames and towards uuids
+// TODO: change dates in events to commitments and add a date field for events that need it
