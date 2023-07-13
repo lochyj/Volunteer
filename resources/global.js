@@ -53,7 +53,7 @@ function addEvent(data, feedDiv) {
 
     // TODO: make this more secure
     event.innerHTML += `
-        <h2>${data.event_name}</h2>
+        <a href="/app/event/${data.event_id}/">${data.event_name}</a><br>
         <p class="tab"><img width="20px" hight="20px" src="/location_icon.svg"><img>${data.event_location}</p>
         <p class="tab"><img width="20px" hight="20px" src="/organization_icon.svg">${data.event_creator}</p>
         <h4>${data.event_date[0]} - ${data.event_date[1]}</h4>

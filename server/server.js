@@ -17,7 +17,8 @@ const {
     eventExists,
     addUserToDB,
     getUserFromDB,
-    getEventsFromDB
+    getEventsFromDB,
+    addEventToUserDB,
 } = require('./database.js')
 
 const {
@@ -275,7 +276,7 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
 
         res.send(DBdata[0]).status(200);
 
-    })
+    });
 
     app.get("/api/events/:number/", authenticateToken, async (req, res) => {
         const number = Number(req.params.number);
@@ -293,7 +294,42 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
 
         res.send(DBdata).status(200);
 
-    })
+    });
+
+    app.get("/api/signup/:event_id/", authenticateToken, async (req, res) => {
+        const event_id = req.params.event_id;
+
+        if (!event_id || event_id == null || event_id == undefined || event_id == '') {
+            res.send(400).json({ error: 'Please provide an event_id' })
+        }
+
+        if (await eventExists(event_id, eventCollection) == false) {
+            res.sendStatus(404);
+        }
+
+        const username = getUser(req.cookies.accessToken);
+
+        const DBdata = await getEventFromDB(event_id, eventCollection);
+
+        if (DBdata == null) {
+            console.log("Something went wrong with getting eventdata from the db");
+            res.sendStatus(500);
+        }
+
+        const event = DBdata[0];
+
+        if (event.signups.includes(username)) {
+            res.sendStatus(403);
+            return;
+        }
+
+        event.signups.push(username);
+
+        eventCollection.updateOne({ event_id: event_id }, { $set: { signups: event.signups } });
+
+        res.sendStatus(200);
+
+    });
 }
 
 async function registerAppPages(userCollection, eventCollection) {

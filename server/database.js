@@ -91,6 +91,24 @@ async function getUserFromDB(username, collection) {
 
 }
 
+async function signupToEvent(username, event_id, collection) {
+    const DBdata = await getEventFromDB(event_id, eventCollection);
+
+    if (DBdata == null) {
+        return null
+    }
+
+    var event = DBdata[0];
+
+    if (event.signups.includes(username)) {
+        return null;
+    }
+
+    event.signups.push(username);
+
+    eventCollection.updateOne({ event_id: event_id }, { $set: { signups: event.signups } });
+}
+
 module.exports = {
     addEventToDB,
     getEventFromDB,
@@ -98,5 +116,6 @@ module.exports = {
     eventExists,
     addUserToDB,
     getUserFromDB,
-    getEventsFromDB
+    getEventsFromDB,
+    addEventToUserDB,
 };

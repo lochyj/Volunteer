@@ -103,11 +103,40 @@
             border-radius: 10px;
             margin-top: 10px;
         }
+
+        .wrapper .back {
+            margin: 20px;
+            padding: 15px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-radius: 50%;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            align-items: center;
+            vertical-align: center;
+        }
+
+        .back a {
+            text-decoration: none;
+            color: #000;
+            font-size: 1.5rem;
+            padding: 0px;
+            margin: 0px;
+            line-height: 1rem;
+        }
+
+        .back a:hover {
+            color: #e22222;
+        }
     </style>
 
 </head>
 <body>
     <div class="wrapper">
+        <div class="back">
+            <a href="/app/homepage.html"><span>✖</span></a>
+        </div>
         <div class="content">
             <h1>Create new event</h1>
             <div id="form" class="form">
@@ -257,7 +286,7 @@
         for (let i = 0; i < notonce.length; i++) {
             notonce[i].hidden = true;
             notonce[i].disabled = true;
-            once[i].style.display = "none";
+            notonce[i].style.display = "none";
         }
 
         commitment.addEventListener("click", function(e) {

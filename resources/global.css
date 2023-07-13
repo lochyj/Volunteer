@@ -35,10 +35,16 @@ body {
   width: 80%;
 }
 
-.event h2 {
+.event a {
   margin-bottom: 10px;
   font-family: 'Lalezar', cursive;
   font-size: 40px;
+  color: #000;
+  text-decoration: none;
+}
+
+.event a:hover {
+  text-decoration: underline;
 }
 
 .event h4 {
