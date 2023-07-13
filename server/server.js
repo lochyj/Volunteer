@@ -185,15 +185,19 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
             !req.body.title ||
             !req.body.description ||
             !req.body.location ||
+            !req.body.commitment ||
             !req.body.date ||
-            !req.body.time ||
 			!req.body.tags
         ) {
-            res.status(400).json({
-                message: "Please provide all required fields"
-            });
-
+            res.status(400).json({message: "Please provide all required fields"});
             return;
+        }
+
+        if (req.body.commitment == "once") {
+            if (!req.body.time) {
+                res.status(400).json({message: "Please provide all required fields"});
+                return;
+            }
         }
 
         const username = getUser(req.cookies.accessToken);
@@ -203,7 +207,7 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
 
         if (permissionLevel == 0) {
             res.status(403).json({
-                message: "You do not have permission to create events"
+                message: "You need to be an organization to create events"
             });
         }
 
@@ -211,7 +215,19 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
 
         const event_id = uuid();
 
-        addEventToDB(title, description, date, time, location, username, tags, event_id, eventCollection);
+        const event = {
+            event_id: event_id,
+            event_title: title,
+            event_description: description,
+            event_location: location,
+            event_date: date,
+            event_time: time || null,
+            event_tags: tags,
+            event_creator: username,
+            signups: []
+        }
+
+        addEventToDB(event, eventCollection);
 
         addEventToUserDB(event_id, username, userCollection);
 

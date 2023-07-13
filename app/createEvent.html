@@ -190,42 +190,58 @@
     </div>
     <script src="/keys.js"></script>
     <script>
-        const form = document.getElementById("form");
-
-        const warn = document.getElementById("warn");
-
-        const submit = document.getElementById("submit");
-
+        const form       = document.getElementById("form");
+        const warn       = document.getElementById("warn");
+        const submit     = document.getElementById("submit");
         const commitment = document.getElementById("commitment_type");
-
-
-        // TODO: get map api working for location selection
 
         submit.addEventListener("click", (e) => {
             e.preventDefault();
 
             const name = document.getElementById("name").value;
             const description = document.getElementById("description").value;
-            const date_from = document.getElementById("date_from").value;
-            const date_to = document.getElementById("date_to").value;
-            const time_from = document.getElementById("time_from").value;
-            const time_to = document.getElementById("time_to").value;
+            const commitment_type = document.getElementById("commitment_type").value;
             const location = document.getElementById("location").value;
-            const type = document.getElementById("type").value;
+            const tags = document.getElementById("type").value;
 
-            if (!name || !description || !date_from || !date_to || !time_from || !time_to || !location || !type || longlat[0] == null || longlat[1] == null) {
+            if (!name || !description || !location || !tags || !commitment_type) {
                 warn.innerText = "Please fill in all fields.";
                 return;
             }
 
-            const data = {
-                title: name,
-                description: description,
-                location: location,
-                date: [date_from, date_to],
-                time: [time_from, time_to],
-                tags: type
-            };
+            var data = {}
+
+            if (commitment_type == "once") {
+                const date_from = document.getElementById("oncedate1").value;
+                const date_to = document.getElementById("oncedate2").value;
+
+                const time_from = document.getElementById("oncetime1").value;
+                const time_to = document.getElementById("oncetime2").value;
+
+                data = {
+                    title: name,
+                    description: description,
+                    location: location,
+                    commitment: commitment_type,
+                    date: [date_from, date_to],
+                    time: [time_from, time_to],
+                    tags: tags
+                };
+
+            } else {
+                const date_from = document.getElementById("date1").value;
+                const date_to = document.getElementById("date2").value;
+
+                data = {
+                    title: name,
+                    description: description,
+                    location: location,
+                    commitment: commitment_type,
+                    date: [date_from, date_to],
+                    tags: tags
+                };
+
+            }
 
             fetch("/api/event/create", {
                 method: "POST",
@@ -301,7 +317,7 @@
                 for (let i = 0; i < notonce.length; i++) {
                     notonce[i].hidden = true;
                     notonce[i].disabled = true;
-                    once[i].style.display = "none";
+                    notonce[i].style.display = "none";
 
                 }
             } else if (e.target.value == "week" || e.target.value == "fortnight" || e.target.value == "month") {
@@ -314,7 +330,7 @@
                 for (let i = 0; i < notonce.length; i++) {
                     notonce[i].hidden = false;
                     notonce[i].disabled = false;
-                    once[i].style.display = "inline";
+                    notonce[i].style.display = "inline";
                 }
             }
         })
