@@ -1,14 +1,46 @@
 //TODO: clean up this function because .innerHTML is not secure
 function displayEvent(event, eventDiv) {
-    eventDiv.innerHTML = `
-        <h1>${event.event_name}</h1>
-        <p>${event.event_description}</p>
-        <h3>${event.event_date}</h3>
-        <h3>${event.event_time}</h3>
-        <h3>${event.event_location}</h3>
-        <h3>${event.event_tags}</h3>
-        <h3>${event.event_creator}</h3>
-    `;
+
+    if (event.event_commitment == "once") {
+        eventDiv.innerHTML = `
+            <h1>${event.event_name}</h1>
+            <p>${event.event_description}</p>
+            <h3>Commitment: One time</h3>
+            <h3>${event.event_date}</h3>
+            <h3>${event.event_time}</h3>
+            <h3>${event.event_location}</h3>
+            <h3>${event.event_tags}</h3>
+            <h3>${event.event_creator}</h3>
+        `;
+    } else {
+
+        switch (event.event_commitment) {
+            case "day":
+                event.event_commitment = "Daily";
+                break;
+            case "week":
+                event.event_commitment = "Weekly";
+                break;
+            case "fortnight":
+                event.event_commitment = "Fortnightly";
+                break;
+            case "month":
+                event.event_commitment = "Monthly";
+                break;
+        }
+
+        eventDiv.innerHTML = `
+            <h1>${event.event_name}</h1>
+            <p>${event.event_description}</p>
+            <h3>Commitment: ${event.event_commitment}</h3>
+            <h3>${event.event_date}</h3>
+            <h3>${event.event_location}</h3>
+            <h3>${event.event_tags}</h3>
+            <h3>${event.event_creator}</h3>
+        `;
+    }
+
+
 
     document.title = event.event_name;
 }

@@ -209,9 +209,10 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
             res.status(403).json({
                 message: "You need to be an organization to create events"
             });
+            return;
         }
 
-        const { title, description, location, date, time, tags } = req.body;
+        const { title, description, location, date, time, tags, commitment } = req.body;
 
         const event_id = uuid();
 
@@ -219,6 +220,7 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
             event_id: event_id,
             event_title: title,
             event_description: description,
+            event_commitment: commitment,
             event_location: location,
             event_date: date,
             event_time: time || null,
@@ -231,7 +233,8 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
 
         addEventToUserDB(event_id, username, userCollection);
 
-        res.send({event_id: event_id}).status(200);
+        res.status(200).send({event_id: event_id});
+
 
     });
 
