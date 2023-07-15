@@ -1,43 +1,70 @@
 //TODO: clean up this function because .innerHTML is not secure
 function displayEvent(event, eventDiv) {
 
+    event.event_description = event.event_description.replace(/\n/g, "<br>");
+    var info_link = ""
+    if (event.event_info != undefined) {
+        info_link = `<a href="${event.event_info}" class="link">${event.event_info}</a>`
+    }
+
+    var signups = "";
+    if (event.signups.length > 0) {
+        if (event.signups.length > 6) {
+            for (let i = 0; i < 6; i++) {
+                signups += `<a href="/app/user/${event.signups[i]}">${event.signups[i]}</a><br>`
+            }
+        } else {
+            for (let i = 0; i < event.signups.length; i++) {
+                signups += `<a href="/app/user/${event.signups[i]}">${event.signups[i]}</a><br>`
+            }
+        }
+    }
+
     if (event.event_commitment == "once") {
         eventDiv.innerHTML = `
             <div class="main">
                 <h1 class="title">${event.event_title}</h1>
+                ${info_link}
+                <h3 class="inline date"> ${event.event_time[0]} - ${event.event_time[1]} every day from ${event.event_date[0]} to ${event.event_date[1]}</h3>
+                <h3>What it entails</h3><br>
                 <p class="description">${event.event_description}</p>
-                <h3 class="inline date">${event.event_date[0]}</h3>
-                <h3 class="inline date">${event.event_date[1]}</h3>
-                <h3 class="inline time">${event.event_time[0]}</h3>
-                <h3 class="inline time">${event.event_time[1]}</h3>
             </div>
 
-
             <div class="side">
-                <h3 class="organization">
+                <h3 class="sideItem">
                     Organization<br>
                     <span class="small">
-                        ${event.event_creator}
+                        <a href="/app/user/${event.event_creator}">${event.event_creator}</a>
                     </span>
                 </h3>
-                <h3 class="location">
+                <h3 class="sideItem">
                     Location<br>
                     <span class="small">
                         ${event.event_location}
                     </span>
                 </h3>
-                <h3 class="tags">
+                <h3 class="sideItem">
+                    Tags<br>
                     <span class="small">
                         ${event.event_tags}
                     </span>
                 </h3>
-                <h3 class="commitment">
+                <h3 class="commitment sideItem">
                     Commitment<br>
                     <span class="small">
                         One time
                     </span>
                 </h3>
+                <h3 style="margin-top: 10px;">
+                    Signups<br>
+                    <span class="small">
+                        ${signups}
+                    </span>
+                </h3>
             </div>
+
+            <button id="signup">Signup</button><br>
+            <p id="error"></p>
         `;
     } else {
 
@@ -59,39 +86,48 @@ function displayEvent(event, eventDiv) {
         eventDiv.innerHTML = `
             <div class="main">
                 <h1 class="title">${event.event_title}</h1>
-                <h3 class="inline date">${event.event_date[0]}</h3>
-                <h3 class="inline date">${event.event_date[1]}</h3>
-                <a href=""
+                ${info_link}
+                <h3 class="inline date">${event.event_commitment} for ${event.event_date[0]} to ${event.event_date[1]}</h3>
+                <h3>What it entails</h3><br>
                 <p class="description">${event.event_description}</p>
-
             </div>
 
+
             <div class="side">
-                <h3 class="organization">
+                <h3 class="sideItem">
                     Organization<br>
                     <span class="small">
-                        <a href="/app/user/${event.event_creator}">${event.event_creator}</a>
+                        ${event.event_creator}
                     </span>
                 </h3>
-                <h3 class="location">
+                <h3 class="sideItem">
                     Location<br>
                     <span class="small">
                         ${event.event_location}
                     </span>
                 </h3>
-                <h3 class="tags">
-                    Type of Work<br>
+                <h3 class="sideItem">
+                    Tags<br>
                     <span class="small">
                         ${event.event_tags}
                     </span>
                 </h3>
-                <h3 class="commitment">
+                <h3 class="commitment sideItem">
                     Commitment<br>
                     <span class="small">
                         One time
                     </span>
                 </h3>
+                <h3 style="margin-top: 10px;">
+                    Signups<br>
+                    <span class="small">
+                        ${signups}
+                    </span>
+                </h3>
             </div>
+
+            <button id="signup">Signup</button><br>
+            <p id="error"></p>
         `;
     }
 
@@ -120,13 +156,41 @@ function displayUser(user, userDiv) {
 
         var toAdd = "";
 
-        var addList = [user.username, user.email, user.phone_number, user_type]
+        if (user.username != undefined) {
+            toAdd += `
+                <div class="section">
+                    <h1>Username</h1>
+                    <h2>${user.username}</h2>
+                </div>
+            `;
 
-        for (var i = 0; i < addList.length; i++) {
-            if (addList[i] == undefined) {
-                continue;
-            }
-            toAdd += `<h2>${addList[i]}</h2>`;
+        }
+        if (user.email != undefined) {
+            toAdd += `
+                <div class="section">
+                    <h1>Email</h1>
+                    <h2>${user.email}</h2>
+                </div>
+            `;
+
+        }
+        if (user.phone_number != undefined) {
+            toAdd += `
+                <div class="section">
+                    <h1>Phone number</h1>
+                    <h2>${user.phone_number}</h2>
+                </div>
+            `;
+
+        }
+         if (user_type != undefined) {
+            toAdd += `
+                <div class="section">
+                    <h1>User type</h1>
+                    <h2>${user_type}</h2>
+                </div>
+            `;
+
         }
 
         userDiv.innerHTML = toAdd;

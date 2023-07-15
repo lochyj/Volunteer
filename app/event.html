@@ -26,7 +26,6 @@
             border: 1px solid #ccc;
             border-radius: 15px;
             margin-top: 5vh;
-            height: 80vh;
             overflow: hidden;
         }
 
@@ -45,6 +44,7 @@
         .title {
             font-weight: bold;
             font-size: 2rem;
+            margin-bottom: 5px;
         }
         .description {
             font-size: 1.1rem;
@@ -57,30 +57,21 @@
 
         .date {
             padding: 4px;
-            background-color: #ccc;
-            border-radius: 4px;
-        }
-        .time {
-            padding: 4px;
-            background-color: #ccc;
-            border-radius: 4px;
+            display: inline-flex;
+            font-weight: normal;
+            color: #5a5a5a;
+            margin-bottom: 10px;
+            margin-top: 10px;
         }
 
-        .organization {
+        .sideItem {
             border-top: 1px solid #ccc;
+            padding-top: 10px;
+            padding-bottom: 10px;
         }
-        .location {
-            border-top: 1px solid #ccc;
 
-        }
-        .tags {
-            border-top: 1px solid #ccc;
-
-        }
         .commitment {
-            border-top: 1px solid #ccc;
             border-bottom: 1px solid #ccc;
-
         }
 
         .small {
@@ -132,6 +123,48 @@
         top: 4px;
         margin-right: 5px;
       }
+
+      .link {
+        text-decoration: none;
+        color: #000;
+        font-weight: bold;
+      }
+
+      .link:hover {
+        text-decoration: underline;
+        color: #0905ff;
+      }
+
+      a {
+        text-decoration: none;
+        color: #000;
+      }
+
+        a:hover {
+            text-decoration: underline;
+            color: #0905ff;
+        }
+
+        #signup {
+            background-color: #4CAF50;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            font-weight: bold;
+        }
+
+        #signup:hover {
+            background-color: #39853b;
+            text-decoration: underline;
+        }
+
+        #error {
+            color: #ff0000;
+            margin: 10px;
+        }
     </style>
 </head>
 <body>
@@ -169,8 +202,26 @@
                 }
                 else {
                     displayEvent(data, eventDiv);
+                    const signup = document.getElementById("signup");
+                    const error = document.getElementById("error");
+                    signup.addEventListener("click", () => {
+                        fetch(`/api/signup/${id}`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            }
+                        }).then(response => response.json()).then(data => {
+                                if (data.error) {
+                                    error.innerHTML = data.error;
+                                } else {
+                                    error.innerHTML = "You successfully signed up!";
+                                }
+                        });
+                    });
                 }
             });
+
+
 
     </script>
 </body>

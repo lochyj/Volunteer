@@ -21,11 +21,6 @@ const {
     addEventToUserDB,
 } = require('./database.js')
 
-const {
-    SSRUserPage,
-    SSREventsPage,
-    SSRErrorPage
-} = require('./ssr.js')
 const { isNumberObject } = require('node:util/types')
 
 const url = 'mongodb://127.0.0.1:27017/'
@@ -213,6 +208,10 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
         }
 
         const { title, description, location, date, time, tags, commitment, info } = req.body;
+        // if the info url doesnt start with http:// or https:// then add it
+        if (info != undefined && !info.startsWith("http://") && !info.startsWith("https://")) {
+            info = "http://" + info;
+        }
 
         const event_id = uuid();
 
@@ -235,7 +234,6 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
         addEventToUserDB(event_id, username, userCollection);
 
         res.status(200).send({event_id: event_id});
-
 
     });
 
@@ -347,7 +345,7 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
 
         eventCollection.updateOne({ event_id: event_id }, { $set: { signups: event.signups } });
 
-        res.sendStatus(200);
+        res.send({}).status(200);
 
     });
 }
@@ -359,7 +357,9 @@ async function registerAppPages(userCollection, eventCollection) {
     });
 
     app.get('/app/settings/', authenticateToken, (req, res) => {
-        res.sendFile('./app/settings.html', { root: serveRoot })
+        const user = getUser(req.cookies.accessToken)
+
+        res.redirect(`/app/user/${user}`)
     });
 
     app.get('/app/create/', authenticateToken, (req, res) => {
