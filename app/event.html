@@ -5,18 +5,146 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+        }
+
+
         #event {
             margin: 0 auto;
             width: 80%;
             padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background-color: #FFF;
+            border: 1px solid #ccc;
+            border-radius: 15px;
+            margin-top: 5vh;
+            height: 80vh;
+            overflow: hidden;
         }
+
+        .main {
+            display: flex;
+            flex-direction: column;
+            grid-column: 1 / 2;
+        }
+        .side {
+            display: flex;
+            flex-direction: column;
+            grid-column: 2 / 2;
+            padding-left: 30%;
+        }
+
+        .title {
+            font-weight: bold;
+            font-size: 2rem;
+        }
+        .description {
+            font-size: 1.1rem;
+        }
+        .inline {
+            display: inline-flex;
+            padding: 20px;
+            width: fit-content;
+        }
+
+        .date {
+            padding: 4px;
+            background-color: #ccc;
+            border-radius: 4px;
+        }
+        .time {
+            padding: 4px;
+            background-color: #ccc;
+            border-radius: 4px;
+        }
+
+        .organization {
+            border-top: 1px solid #ccc;
+        }
+        .location {
+            border-top: 1px solid #ccc;
+
+        }
+        .tags {
+            border-top: 1px solid #ccc;
+
+        }
+        .commitment {
+            border-top: 1px solid #ccc;
+            border-bottom: 1px solid #ccc;
+
+        }
+
+        .small {
+            font-weight: normal;
+        }
+
+        /* Header Styles */
+
+    header {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        display: flexbox;
+        margin: 20px;
+        box-shadow: 0px 0px 10px #ccc;
+      }
+  
+      header a {
+        font-size: 32px;
+        display: inline;
+        color: #000;
+        font-weight: bolder;
+        text-decoration: none;
+      }
+  
+      header a:hover {
+        text-decoration: underline;
+      }
+  
+      .right {
+        float: right;
+      }
+  
+      .right a {
+        margin-left: 10px;
+        font-weight: normal;
+        color: #5a5a5a;
+      }
+  
+      .right a:hover {
+        text-decoration: underline;
+        color: #0905ff;
+      }
+
+      img.header {
+        position: relative;
+        top: 4px;
+        margin-right: 5px;
+      }
     </style>
 </head>
 <body>
-    <div>
-        <div id="event">
-
+    <header>
+        <a href="/app/"><img src="/iconBig.png" class="header" width="32px" height="32px">Volunteer</a>
+    
+        <div class="right">
+          <a href="/app/">Events</a>
+          <a href="/app/settings">Profile</a>
         </div>
+    </header>
+    <div>
+        <div id="event"><!-- Event data goes here --></div>
     </div>
     <script src="/global.js"></script>
     <script>
@@ -26,7 +154,7 @@
         var urlSplit = url.split("/");
 
         if (urlSplit.length < 3) {
-            window.location.href = "/app/homepage.html";
+            window.location.href = "/app/";
         }
 
         var id = urlSplit[3];
@@ -37,7 +165,7 @@
                 console.log(data);
 
                 if (data.error) {
-                    window.location.href = "/app/homepage.html";
+                    window.location.href = "/app/";
                 }
                 else {
                     displayEvent(data, eventDiv);

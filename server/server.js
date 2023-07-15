@@ -212,7 +212,7 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
             return;
         }
 
-        const { title, description, location, date, time, tags, commitment } = req.body;
+        const { title, description, location, date, time, tags, commitment, info } = req.body;
 
         const event_id = uuid();
 
@@ -226,6 +226,7 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
             event_time: time || null,
             event_tags: tags,
             event_creator: username,
+            event_info: info,
             signups: []
         }
 
@@ -315,7 +316,7 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
 
     });
 
-    app.get("/api/signup/:event_id/", authenticateToken, async (req, res) => {
+    app.post("/api/signup/:event_id/", authenticateToken, async (req, res) => {
         const event_id = req.params.event_id;
 
         if (!event_id || event_id == null || event_id == undefined || event_id == '') {
@@ -338,7 +339,7 @@ async function registerAPIEndpoints(userCollection, eventCollection) {
         const event = DBdata[0];
 
         if (event.signups.includes(username)) {
-            res.sendStatus(403);
+            res.send({error: "You are already attending this event."}).status(403);
             return;
         }
 
@@ -355,10 +356,6 @@ async function registerAppPages(userCollection, eventCollection) {
 
     app.get('/app/', authenticateToken, (req, res) => {
         res.sendFile('./app/homepage.html', { root: serveRoot })
-    });
-
-    app.get('/app/dashboard/', authenticateToken, (req, res) => {
-        res.sendFile('./app/dashboard.html', { root: serveRoot })
     });
 
     app.get('/app/settings/', authenticateToken, (req, res) => {

@@ -3,15 +3,14 @@
 <head>
   <title></title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter&family=Lalezar&display=swap');
     * {
       margin: 0;
       padding: 0;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Roboto', sans-serif;
     }
 
     body {
-      background-color: #FFFFFF;
+      background-color: #f5f5f5;
     }
 
     .eventsFeed {
@@ -23,30 +22,29 @@
       flex-direction: column;
     }
 
-    /* #feed {
-      width: 80%;
-      margin: 0 auto;
-      margin-top: 20px;
-    } */
-
     .event {
       background-color: #fff;
-      padding: 20px;
+      padding: 25px;
       border-radius: 15px;
       margin-bottom: 20px;
       border: 1px solid #ccc;
       width: 80%;
     }
 
+    .event:hover {
+      box-shadow: 0px 0px 10px #ccc;
+    }
+
     .event a {
       margin-bottom: 10px;
-      font-family: 'Lalezar', cursive;
-      font-size: 40px;
-      color: #000;
+      font-weight: bolder;
+      font-size: 35px;
+      color: #4CAF50;
       text-decoration: none;
     }
 
     .event a:hover {
+      color: #39853b;
       text-decoration: underline;
     }
 
@@ -75,23 +73,108 @@
     }
 
     .event .tab {
+      display: flex;
+      font-size: 20px;
+      grid-column: 1;
+      margin: 5px;
+    }
+
+    .event .inline {
       display: inline;
       font-size: 20px;
       grid-column: 1;
       margin: 5px;
-      align-items: right;
-      vertical-align: middle;
+      margin-right: 20px;
+      color: #5a5a5a;
     }
+
+    .tab img, .inline img {
+      position: relative;
+      top: 3px;
+      margin-right: 3px;
+    }
+
+    a.tab, a.inline {
+      text-decoration: none;
+      font-weight: normal;
+      font-family: 'Roboto', sans-serif;
+      color: #000;
+    }
+
+    a.tab:hover, a.inline:hover {
+      text-decoration: underline;
+      color: #0905ff;
+    }
+
+    .line {
+      margin-top: 5px;
+      width: max-content;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 2px;
+    }
+
+    /* Header Styles */
+
+    header {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      display: flexbox;
+      margin: 20px;
+      box-shadow: 0px 0px 10px #ccc;
+    }
+
+    header a {
+      font-size: 32px;
+      display: inline;
+      color: #000;
+      font-weight: bolder;
+      text-decoration: none;
+    }
+
+    header a:hover {
+      text-decoration: underline;
+    }
+
+    .right {
+      float: right;
+    }
+
+    .right a {
+      margin-left: 10px;
+      font-weight: normal;
+      color: #5a5a5a;
+    }
+
+    .right a:hover {
+      text-decoration: underline;
+      color: #0905ff;
+    }
+
+    img.header {
+      position: relative;
+      top: 4px;
+      margin-right: 5px;
+    }
+
   </style>
 </head>
 <body>
   <header>
-    <h1>Volunteer Homepage</h1>
+    <a href="/app/"><img src="/iconBig.png" class="header" width="32px" height="32px">Volunteer</a>
+
+    <div class="right">
+      <a href="/app/">Events</a>
+      <a href="/app/settings">Profile</a>
+    </div>
   </header>
   <div>
 
     <div id="feed" class="eventsFeed">
-      <h1>Events</h1>
+      <h1 style="margin-bottom: 15px;">Events</h1>
     </div>
   </div>
   <script src="/global.js"></script>

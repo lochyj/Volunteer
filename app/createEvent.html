@@ -24,7 +24,11 @@
             background-color: #fff;
             border: 1px solid #ccc;
             padding: 20px;
-            border-radius: 5px;
+            border-radius: 15px;
+        }
+
+        .content:hover {
+            box-shadow: 0px 0px 10px #ccc;
         }
         
         .content h1 {
@@ -99,43 +103,77 @@
             bottom: 0;
             right: 0;
             margin: 20px;
-            border-radius: 10px;
+            border-radius: 15px;
             background-color: #fff;
             border: 1px solid #ccc;
             padding: 20px;
+        }
+        #mapBox:hover {
+            box-shadow: 0px 0px 10px #ccc;
         }
         #map {
             border-radius: 10px;
             margin-top: 10px;
         }
 
-        .back {
-            margin: 20px;
-            padding: 15px;
-            position: absolute;
-            top: 0;
-            left: 0;
-            border-radius: 50%;
-            background-color: #fff;
-            border: 1px solid #ccc;
-            align-items: center;
-            vertical-align: center;
-            font-size: 1.5rem;
-            line-height: 1.25rem;
-        }
+        /* Header Styles */
 
-        .back:hover {
-            color: #e22222;
-            border: 1px solid #e22222;
-        }
+    header {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        display: flexbox;
+        margin: 20px;
+        box-shadow: 0px 0px 10px #ccc;
+      }
+  
+      header a {
+        font-size: 32px;
+        display: inline;
+        color: #000;
+        font-weight: bolder;
+        text-decoration: none;
+      }
+  
+      header a:hover {
+        text-decoration: underline;
+      }
+  
+      .right {
+        float: right;
+      }
+  
+      .right a {
+        margin-left: 10px;
+        font-weight: normal;
+        color: #5a5a5a;
+      }
+  
+      .right a:hover {
+        text-decoration: underline;
+        color: #0905ff;
+      }
+  
+      img.header {
+        position: relative;
+        top: 4px;
+        margin-right: 5px;
+      }
     </style>
 
 </head>
 <body>
+    <header>
+        <a href="/app/"><img src="/iconBig.png" class="header" width="32px" height="32px">Volunteer</a>
+    
+        <div class="right">
+          <a href="/app/">Events</a>
+          <a href="/app/settings">Profile</a>
+        </div>
+    </header>
     <div class="wrapper">
-        <button class="back" onclick="document.location ='/app/'">
-            ✖
-        </button>
         <div class="content">
             <h1>Create new event</h1>
             <div id="form" class="form">
@@ -173,6 +211,7 @@
                 <!--  -->
 
                 <input disabled id="location" placeholder="Location"><br>
+                <input type="text" id="info" placeholder="Link to event website | Not required"><br>
 
                 <input type="text" name="type" id="type" placeholder="Event tags | E.g: Sport, Fundraising"><br>
 
@@ -202,6 +241,7 @@
             const commitment_type = document.getElementById("commitment_type").value;
             const location = document.getElementById("location").value;
             const tags = document.getElementById("type").value;
+            const info = document.getElementById("info").value;
 
             if (!name || !description || !location || !tags || !commitment_type) {
                 warn.innerText = "Please fill in all fields.";
@@ -224,6 +264,7 @@
                     commitment: commitment_type,
                     date: [date_from, date_to],
                     time: [time_from, time_to],
+                    info: info,
                     tags: tags
                 };
 
@@ -237,6 +278,7 @@
                     location: location,
                     commitment: commitment_type,
                     date: [date_from, date_to],
+                    info: info,
                     tags: tags
                 };
 

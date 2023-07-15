@@ -1,4 +1,5 @@
 # Volunteer
+![Volunteer logo](./resources/iconBig.png)
  An online volunteering and volunteer management system
 
 ideas:
@@ -15,4 +16,9 @@ volunteer.com.au interface
 
 //TODO: probably remove refresh tokens as they arent really used...
 // TODO: migrate away from usernames and towards uuids
-// TODO: change dates in events to commitments and add a date field for events that need it
+
+// TODO: add requirements to the volunteer application
+//TODO: add link to website on createEvent
+//TODO: add error handling on client side
+
+//TODO: the entire application is easily subject to html injection attacks, either fix this or highlight it in the report
